@@ -6,34 +6,32 @@
 #include <string>
 #include <random>
 #include <chrono>
-
-#include "XoshiroCpp.h"
+#include <Windows.h>
 
 constexpr char ALL_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 constexpr unsigned char ALL_CHARS_LENGTH = 26;
 constexpr unsigned char NUMERIC_CHARS_LENGTH = 10;
 
-int GenerateRandom(const int nSeed)
-{
-	XoshiroCpp::Xoshiro256PlusPlus rng(nSeed);
-	std::uniform_int_distribution<int> dist(0, strlen(ALL_CHARS));
-
-	return dist(rng);
-}
-
 std::chrono::steady_clock g_Clock;
 
-int AddRTTimeRandomization(const int nRand)
+int GenerateRandom(const int nSeed)
 {
-	return nRand + (g_Clock.now().time_since_epoch().count() + (__TIME__[1]));
+	std::random_device d{};
+	std::mt19937 r(d());
+	const int nRand = r();
+	nRand + (__COUNTER__ + (__TIME__[1]));
+	return nRand;
 }
 
 std::string GenerateKey()
 {
 	std::string szRes = "";
 	for (int i = 0; i < 18; i++)
-		szRes.push_back(ALL_CHARS[AddRTTimeRandomization(GenerateRandom(i) * 1000) % ALL_CHARS_LENGTH]);
+	{
+		szRes.push_back(ALL_CHARS[std::clamp<int>((GenerateRandom(i) * 1000) % ALL_CHARS_LENGTH,
+			0, ALL_CHARS_LENGTH)]);
+	}
 
 	if (szRes.length() >= 18)
 	{
@@ -46,6 +44,9 @@ std::string GenerateKey()
 
 int main()
 {
+	// FIXME: We need to sleep here because the random number generation fucks up if g_Clock.now()
+	// isn't high enough
+
 	printf_s("Amount of keys to generate: ");
 	std::string szInput = "";
 	std::cin >> szInput;
