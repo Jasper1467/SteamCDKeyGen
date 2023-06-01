@@ -44,22 +44,17 @@ std::string GenerateKey()
 
 int main()
 {
-	// FIXME: We need to sleep here because the random number generation fucks up if g_Clock.now()
-	// isn't high enough
-
 	printf_s("Amount of keys to generate: ");
 	std::string szInput = "";
 	std::cin >> szInput;
 
 	int nAmount = std::atoi(szInput.c_str());
 
-	g_Clock.now();
-
-	std::ofstream File("keys_generated.txt");
+	std::ofstream File("keys_generated.csv");
 
 	while (nAmount > 0)
 	{
-		File << GenerateKey() << "\n";
+		File << GenerateKey() << ",\n";
 
 		nAmount--;
 	}
