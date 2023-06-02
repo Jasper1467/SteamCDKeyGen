@@ -13,8 +13,6 @@ constexpr char ALL_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr unsigned char ALL_CHARS_LENGTH = 26;
 constexpr unsigned char NUMERIC_CHARS_LENGTH = 10;
 
-std::chrono::steady_clock g_Clock;
-
 int GenerateRandom(const int nSeed)
 {
 	std::random_device d{};
@@ -42,21 +40,60 @@ std::string GenerateKey()
 	return szRes;
 }
 
+enum Format_e
+{
+	FORMAT_PLAIN = 0,
+	FORMAT_CSV = 1,
+	FORMAT_COUNT,
+};
+
+const char* g_szFileExtension[] = { ".txt", ".csv" };
+
+#define WRITE_FORMAT_PLAIN() while (nAmount > 0)\
+	{\
+		File << GenerateKey() << "\n";\
+		nAmount--;\
+	}
+
+#define WRITE_FORMAT_CSV() while (nAmount > 0)\
+	{\
+		File << GenerateKey() << ",\n";\
+		nAmount--;\
+	}
+
 int main()
 {
+	printf_s("Select an output format: \n");
+	printf_s("PLAIN: 0\n");
+	printf_s("CSV: 1\n");
+
+	std::string szFormatInput = "";
+	std::cin >> szFormatInput;
+
+	printf_s("\n");
+
+	const int nFormat = std::atoi(szFormatInput.c_str());
+	if (nFormat >= FORMAT_COUNT)
+	{
+		printf_s("Invalid format: %i", nFormat);
+		return 0;
+	}
+
 	printf_s("Amount of keys to generate: ");
 	std::string szInput = "";
 	std::cin >> szInput;
 
 	int nAmount = std::atoi(szInput.c_str());
 
-	std::ofstream File("keys_generated.csv");
+	std::ofstream File(std::string("keys_generated") + g_szFileExtension[nFormat]);
 
-	while (nAmount > 0)
+	switch (nFormat)
 	{
-		File << GenerateKey() << ",\n";
-
-		nAmount--;
+	case FORMAT_PLAIN: WRITE_FORMAT_PLAIN(); break;
+	case FORMAT_CSV: WRITE_FORMAT_CSV(); break;
+	default:
+		printf_s("ERROR: Can't start writing due to invalid format\n");
+		break;
 	}
 
 	printf_s("Done!\n");
