@@ -6,12 +6,13 @@
 #include <string>
 #include <random>
 #include <chrono>
-#include <Windows.h>
 
 constexpr char ALL_CHARS[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 constexpr unsigned char ALL_CHARS_LENGTH = 26;
 constexpr unsigned char NUMERIC_CHARS_LENGTH = 10;
+
+constexpr int KEY_LENGTH = 18;
 
 int GenerateRandom(const int nSeed)
 {
@@ -24,14 +25,15 @@ int GenerateRandom(const int nSeed)
 
 std::string GenerateKey()
 {
-	std::string szRes = "";
-	for (int i = 0; i < 18; i++)
+	std::string szRes;
+	szRes.reserve(KEY_LENGTH);
+	for (int i = 0; i < KEY_LENGTH; i++)
 	{
 		szRes.push_back(ALL_CHARS[std::clamp<int>((GenerateRandom(i) * 1000) % ALL_CHARS_LENGTH,
 			0, ALL_CHARS_LENGTH)]);
 	}
 
-	if (szRes.length() >= 18)
+	if (szRes.length() >= KEY_LENGTH)
 	{
 		szRes[5] = '-';
 		szRes[11] = '-';
